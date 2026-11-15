@@ -9788,7 +9788,19 @@ async function updateCampaign(id, input) {
 	};
 }
 async function deleteCampaign(id) {
-	await getDatabase().delete(campaigns$1).where(eq(campaigns$1.id, id));
+	getDatabase().transaction((tx) => {
+		const campaignEncounterIds = tx.select({ id: encounters.id }).from(encounters).where(eq(encounters.campaignId, id)).all().map((row) => row.id);
+		if (campaignEncounterIds.length > 0) {
+			const campaignGroupIds = tx.select({ id: encounterGroups.id }).from(encounterGroups).where(inArray(encounterGroups.encounterId, campaignEncounterIds)).all().map((row) => row.id);
+			if (campaignGroupIds.length > 0) tx.delete(encounterEntries).where(inArray(encounterEntries.groupId, campaignGroupIds)).run();
+			tx.delete(encounterEntries).where(inArray(encounterEntries.encounterId, campaignEncounterIds)).run();
+			tx.delete(encounterGroups).where(inArray(encounterGroups.encounterId, campaignEncounterIds)).run();
+			tx.delete(encounters).where(eq(encounters.campaignId, id)).run();
+		}
+		tx.delete(relationships$1).where(eq(relationships$1.campaignId, id)).run();
+		tx.delete(entities$1).where(eq(entities$1.campaignId, id)).run();
+		tx.delete(campaigns$1).where(eq(campaigns$1.id, id)).run();
+	});
 }
 // electron/handlers/campaigns.ts
 function registerCampaignHandlers() {

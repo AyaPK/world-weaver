@@ -1,8 +1,15 @@
 import { randomUUID } from 'crypto'
-import { eq } from 'drizzle-orm'
+import { eq, inArray } from 'drizzle-orm'
 import { z } from 'zod'
 import { getDatabase } from '../database/connection'
-import { campaigns } from '../database/schema'
+import {
+  campaigns,
+  entities,
+  encounterEntries,
+  encounterGroups,
+  encounters,
+  relationships,
+} from '../database/schema'
 import { getActiveWorkspace } from '../workspaces/workspaceService'
 import { seedMonstersForCampaign } from '../entities/monsterSeedService'
 import { seedSpellsForCampaign } from '../entities/spellSeedService'
@@ -94,5 +101,33 @@ export async function updateCampaign(id: string, input: UpdateCampaignInput): Pr
 
 export async function deleteCampaign(id: string): Promise<void> {
   const db = getDatabase()
-  await db.delete(campaigns).where(eq(campaigns.id, id))
+
+  db.transaction((tx) => {
+    const campaignEncounterIds = tx
+      .select({ id: encounters.id })
+      .from(encounters)
+      .where(eq(encounters.campaignId, id))
+      .all()
+      .map((row) => row.id)
+
+    if (campaignEncounterIds.length > 0) {
+      const campaignGroupIds = tx
+        .select({ id: encounterGroups.id })
+        .from(encounterGroups)
+        .where(inArray(encounterGroups.encounterId, campaignEncounterIds))
+        .all()
+        .map((row) => row.id)
+
+      if (campaignGroupIds.length > 0) {
+        tx.delete(encounterEntries).where(inArray(encounterEntries.groupId, campaignGroupIds)).run()
+      }
+      tx.delete(encounterEntries).where(inArray(encounterEntries.encounterId, campaignEncounterIds)).run()
+      tx.delete(encounterGroups).where(inArray(encounterGroups.encounterId, campaignEncounterIds)).run()
+      tx.delete(encounters).where(eq(encounters.campaignId, id)).run()
+    }
+
+    tx.delete(relationships).where(eq(relationships.campaignId, id)).run()
+    tx.delete(entities).where(eq(entities.campaignId, id)).run()
+    tx.delete(campaigns).where(eq(campaigns.id, id)).run()
+  })
 }

@@ -9,6 +9,17 @@ import {
   CreateCampaignSchema,
   UpdateCampaignSchema,
 } from '../main/campaigns/campaignService'
+import { createEntity, getEntities } from '../main/entities/entityService'
+import {
+  createRelationship,
+  getRelationshipsByCampaign,
+} from '../main/relationships/relationshipService'
+import {
+  createEncounter,
+  createGroup,
+  createEntry,
+  getEncountersByCampaign,
+} from '../main/encounters/encounterService'
 
 describe('campaignService', () => {
   setupTestEnvironment()
@@ -164,6 +175,45 @@ describe('campaignService', () => {
       await deleteCampaign(created.id)
       const found = await getCampaignById(created.id)
       expect(found).toBeNull()
+    })
+
+    it('deletes campaign-owned entities, relationships, and encounters', async () => {
+      const created = await createCampaign({ name: 'Delete With Children' })
+      const source = await createEntity({
+        campaignId: created.id,
+        type: 'npc',
+        name: 'Source Entity',
+        visibility: 'campaign',
+        metadata: { type: 'npc' },
+      })
+      const target = await createEntity({
+        campaignId: created.id,
+        type: 'location',
+        name: 'Target Entity',
+        visibility: 'campaign',
+        metadata: { type: 'location' },
+      })
+      await createRelationship({
+        campaignId: created.id,
+        sourceEntityId: source.id,
+        targetEntityId: target.id,
+        relationshipType: 'related_to',
+      })
+      const encounter = await createEncounter({ campaignId: created.id, name: 'Ambush' })
+      const group = await createGroup({ encounterId: encounter.id, name: 'Wave 1' })
+      await createEntry({
+        groupId: group.id,
+        encounterId: encounter.id,
+        name: 'Goblin',
+        cr: '1/4',
+      })
+
+      await deleteCampaign(created.id)
+
+      expect(await getCampaignById(created.id)).toBeNull()
+      expect(await getEntities(created.id)).toEqual([])
+      expect(await getRelationshipsByCampaign(created.id)).toEqual([])
+      expect(await getEncountersByCampaign(created.id)).toEqual([])
     })
 
     it('does not throw when deleting a non-existent ID', async () => {
