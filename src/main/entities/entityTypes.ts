@@ -103,6 +103,9 @@ export const PlayerMetadataSchema = z.object({
   race: z.string().optional(),
   level: z.string().optional(),
   player: z.string().optional(),
+  armorClass: z.number().optional(),
+  hitPoints: z.number().optional(),
+  initiativeBonus: z.number().optional(),
 })
 
 // ---------------------------------------------------------------------------

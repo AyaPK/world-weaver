@@ -85,6 +85,9 @@ export interface PlayerMetadata {
   race?: string
   level?: string
   player?: string
+  armorClass?: number
+  hitPoints?: number
+  initiativeBonus?: number
 }
 
 export interface SpellMetadata {

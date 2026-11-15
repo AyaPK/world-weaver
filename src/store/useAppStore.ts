@@ -1,13 +1,13 @@
 import { create } from 'zustand'
 import type { Campaign, Entity, EntityType } from '../types/electron.d'
 
-export type AppSection = 'world-bible' | 'encounters'
+export type AppSection = 'world-bible' | 'encounters' | 'combat'
 
 interface AppState {
   activeCampaignId: string | null
   activeCampaign: Campaign | null
   selectedEntityId: string | null
-  view: 'campaign-select' | 'campaign-overview' | 'world-bible' | 'entity-list' | 'entity-detail' | 'settings' | 'encounters'
+  view: 'campaign-select' | 'campaign-overview' | 'world-bible' | 'entity-list' | 'entity-detail' | 'settings' | 'encounters' | 'combat'
   appSection: AppSection | null
   entityTypeFilter: EntityType | null
   searchQuery: string
@@ -25,6 +25,7 @@ interface AppState {
   navigateToCampaignOverview: () => void
   navigateToWorldBible: () => void
   navigateToEncounters: () => void
+  navigateToCombat: () => void
   navigateToCampaignSelect: () => void
 }
 
@@ -77,6 +78,9 @@ export const useAppStore = create<AppState>((set) => ({
 
   navigateToEncounters: () =>
     set({ view: 'encounters', appSection: 'encounters', selectedEntityId: null }),
+
+  navigateToCombat: () =>
+    set({ view: 'combat', appSection: 'combat', selectedEntityId: null }),
 
   navigateToCampaignSelect: () =>
     set({

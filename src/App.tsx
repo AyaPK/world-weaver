@@ -5,6 +5,7 @@ import { CampaignSelect } from './components/CampaignSelect'
 import { CampaignDashboard } from './components/CampaignDashboard'
 import { CampaignHub } from './components/CampaignHub'
 import { EncounterCreator } from './components/EncounterCreator'
+import { CombatTracker } from './components/CombatTracker'
 import { EntityList } from './components/EntityList'
 import { EntityDetail } from './components/EntityDetail'
 import { SettingsPanel } from './components/SettingsPanel'
@@ -18,6 +19,7 @@ function App() {
       case 'campaign-overview': return <CampaignDashboard />
       case 'world-bible': return <CampaignHub />
       case 'encounters': return <EncounterCreator />
+      case 'combat': return <CombatTracker />
       case 'entity-list': return <EntityList />
       case 'entity-detail': return <EntityDetail />
       case 'settings': return <SettingsPanel />

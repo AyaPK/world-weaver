@@ -219,14 +219,15 @@ function MetadataFields({ type, metadata, setMeta, setMetadata }: { type: Entity
     )
   }
 
+  const num = (k: string) => ((metadata as Record<string, number>)[k])?.toString() ?? ''
+  const setNum = (k: string, v: string) => {
+    const n = parseInt(v, 10)
+    if (!isNaN(n)) setMetadata((prev) => ({ ...prev, [k]: n }))
+    else if (v === '') setMetadata((prev) => { const next = { ...prev }; delete next[k]; return next })
+  }
+
   if (type === 'monster') {
     const m = metadata as unknown as MonsterMetadata
-    const num = (k: string) => ((metadata as Record<string, number>)[k])?.toString() ?? ''
-    const setNum = (k: string, v: string) => {
-      const n = parseInt(v, 10)
-      if (!isNaN(n)) setMetadata((prev) => ({ ...prev, [k]: n }))
-      else if (v === '') setMetadata((prev) => { const next = { ...prev }; delete next[k]; return next })
-    }
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {/* Core identity */}
@@ -295,6 +296,11 @@ function MetadataFields({ type, metadata, setMeta, setMetadata }: { type: Entity
         <Input label="Race" value={m.race ?? ''} onChange={(v) => setMeta('race', v)} placeholder="Human, elf, dwarf..." />
         <Input label="Level" value={m.level ?? ''} onChange={(v) => setMeta('level', v)} placeholder="1-20" />
         <Input label="Player Name" value={m.player ?? ''} onChange={(v) => setMeta('player', v)} placeholder="Real-world player's name..." />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+          <Input label="Armour Class" value={num('armorClass')} onChange={(v) => setNum('armorClass', v)} placeholder="15" />
+          <Input label="Max Hit Points" value={num('hitPoints')} onChange={(v) => setNum('hitPoints', v)} placeholder="32" />
+          <Input label="Initiative Bonus" type="number" value={num('initiativeBonus')} onChange={(v) => setNum('initiativeBonus', v)} placeholder="2" />
+        </div>
       </>
     )
   }

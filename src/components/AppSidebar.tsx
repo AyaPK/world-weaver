@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BookOpen, Home, Swords } from 'lucide-react'
+import { BookOpen, Home, ListOrdered, Swords } from 'lucide-react'
 import { useAppStore } from '../store/useAppStore'
 import type { AppSection } from '../store/useAppStore'
 
@@ -23,13 +23,25 @@ const SECTIONS: SectionDef[] = [
     icon: <Swords size={18} />,
     color: '#f87171',
   },
+  {
+    id: 'combat',
+    label: 'Combat Tracker',
+    icon: <ListOrdered size={18} />,
+    color: '#fb923c',
+  },
 ]
 
 export function AppSidebar() {
-  const { appSection, activeCampaign, navigateToCampaignOverview, navigateToWorldBible, navigateToEncounters } = useAppStore()
+  const { appSection, activeCampaign, navigateToCampaignOverview, navigateToWorldBible, navigateToEncounters, navigateToCombat } = useAppStore()
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
 
   if (!activeCampaign) return null
+
+  const navigateTo: Record<AppSection, () => void> = {
+    'world-bible': navigateToWorldBible,
+    encounters: navigateToEncounters,
+    combat: navigateToCombat,
+  }
 
   return (
     <div style={sidebarStyle}>
@@ -54,7 +66,7 @@ export function AppSidebar() {
           <button
             key={section.id}
             title={section.label}
-            onClick={section.id === 'world-bible' ? navigateToWorldBible : navigateToEncounters}
+            onClick={navigateTo[section.id]}
             onMouseEnter={() => setHoveredItem(section.id)}
             onMouseLeave={() => setHoveredItem(null)}
             style={{

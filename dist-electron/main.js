@@ -9939,7 +9939,10 @@ var EntityMetadataSchema = discriminatedUnion("type", [
 		playerClass: string().optional(),
 		race: string().optional(),
 		level: string().optional(),
-		player: string().optional()
+		player: string().optional(),
+		armorClass: number().optional(),
+		hitPoints: number().optional(),
+		initiativeBonus: number().optional()
 	}),
 	SpellMetadataSchema
 ]);
