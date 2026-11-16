@@ -235,6 +235,7 @@ declare global {
         }) => Promise<Entity>
         delete: (id: string, campaignId: string) => Promise<{ success: boolean }>
         counts: (campaignId: string) => Promise<EntityCounts>
+        pickImage: () => Promise<string | null>
       }
       relationships: {
         list: (entityId: string) => Promise<Relationship[]>

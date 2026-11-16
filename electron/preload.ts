@@ -35,6 +35,7 @@ const api = {
     delete: (id: string, campaignId: string) =>
       ipcRenderer.invoke('entities:delete', id, campaignId),
     counts: (campaignId: string) => ipcRenderer.invoke('entities:counts', campaignId),
+    pickImage: () => ipcRenderer.invoke('entities:pickImage'),
   },
   relationships: {
     list: (entityId: string) => ipcRenderer.invoke('relationships:list', entityId),

@@ -17,7 +17,8 @@ electron.contextBridge.exposeInMainWorld("api", {
 		create: (data) => electron.ipcRenderer.invoke("entities:create", data),
 		update: (id, campaignId, data) => electron.ipcRenderer.invoke("entities:update", id, campaignId, data),
 		delete: (id, campaignId) => electron.ipcRenderer.invoke("entities:delete", id, campaignId),
-		counts: (campaignId) => electron.ipcRenderer.invoke("entities:counts", campaignId)
+		counts: (campaignId) => electron.ipcRenderer.invoke("entities:counts", campaignId),
+		pickImage: () => electron.ipcRenderer.invoke("entities:pickImage")
 	},
 	relationships: {
 		list: (entityId) => electron.ipcRenderer.invoke("relationships:list", entityId),

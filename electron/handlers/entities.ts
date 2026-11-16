@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron'
+import { ipcMain, dialog } from 'electron'
 import {
   createEntity,
   getEntities,
@@ -53,6 +53,16 @@ export function registerEntityHandlers() {
   ) => {
     await deleteEntity(id, campaignId)
     return { success: true }
+  })
+
+  ipcMain.handle('entities:pickImage', async () => {
+    const result = await dialog.showOpenDialog({
+      title: 'Choose Entity Image',
+      filters: [{ name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp'] }],
+      properties: ['openFile'],
+    })
+    if (result.canceled || result.filePaths.length === 0) return null
+    return result.filePaths[0]
   })
 
   ipcMain.handle('entities:counts', async (

@@ -20,6 +20,7 @@ export const NpcMetadataSchema = z.object({
   personality: z.string().optional(),
   race: z.string().optional(),
   affiliation: z.string().optional(),
+  image: z.string().optional(),
 })
 
 export const LocationMetadataSchema = z.object({
@@ -27,6 +28,7 @@ export const LocationMetadataSchema = z.object({
   locationType: z.string().optional(),
   region: z.string().optional(),
   population: z.string().optional(),
+  image: z.string().optional(),
 })
 
 export const FactionMetadataSchema = z.object({
@@ -34,6 +36,7 @@ export const FactionMetadataSchema = z.object({
   goals: z.string().optional(),
   alignment: z.string().optional(),
   headquarters: z.string().optional(),
+  image: z.string().optional(),
 })
 
 export const ItemMetadataSchema = z.object({
@@ -41,6 +44,7 @@ export const ItemMetadataSchema = z.object({
   itemType: z.string().optional(),
   rarity: z.string().optional(),
   attunement: z.boolean().optional(),
+  image: z.string().optional(),
 })
 
 const MonsterActionSchema = z.object({
@@ -53,6 +57,7 @@ const MonsterActionSchema = z.object({
 
 export const MonsterMetadataSchema = z.object({
   type: z.literal('monster'),
+  image: z.string().optional(),
   monsterType: z.string().optional(),
   challengeRating: z.string().optional(),
   habitat: z.string().optional(),
@@ -84,6 +89,7 @@ export const MonsterMetadataSchema = z.object({
 
 export const SpellMetadataSchema = z.object({
   type: z.literal('spell'),
+  image: z.string().optional(),
   level: z.string().optional(),
   school: z.string().optional(),
   castingTime: z.string().optional(),
@@ -99,6 +105,7 @@ export const SpellMetadataSchema = z.object({
 
 export const PlayerMetadataSchema = z.object({
   type: z.literal('player'),
+  image: z.string().optional(),
   playerClass: z.string().optional(),
   race: z.string().optional(),
   level: z.string().optional(),

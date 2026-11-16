@@ -9858,25 +9858,29 @@ var NpcMetadataSchema = object({
 	occupation: string().optional(),
 	personality: string().optional(),
 	race: string().optional(),
-	affiliation: string().optional()
+	affiliation: string().optional(),
+	image: string().optional()
 });
 var LocationMetadataSchema = object({
 	type: literal("location"),
 	locationType: string().optional(),
 	region: string().optional(),
-	population: string().optional()
+	population: string().optional(),
+	image: string().optional()
 });
 var FactionMetadataSchema = object({
 	type: literal("faction"),
 	goals: string().optional(),
 	alignment: string().optional(),
-	headquarters: string().optional()
+	headquarters: string().optional(),
+	image: string().optional()
 });
 var ItemMetadataSchema = object({
 	type: literal("item"),
 	itemType: string().optional(),
 	rarity: string().optional(),
-	attunement: boolean().optional()
+	attunement: boolean().optional(),
+	image: string().optional()
 });
 var MonsterActionSchema = object({
 	name: string(),
@@ -9887,6 +9891,7 @@ var MonsterActionSchema = object({
 });
 var MonsterMetadataSchema = object({
 	type: literal("monster"),
+	image: string().optional(),
 	monsterType: string().optional(),
 	challengeRating: string().optional(),
 	habitat: string().optional(),
@@ -9916,6 +9921,7 @@ var MonsterMetadataSchema = object({
 });
 var SpellMetadataSchema = object({
 	type: literal("spell"),
+	image: string().optional(),
 	level: string().optional(),
 	school: string().optional(),
 	castingTime: string().optional(),
@@ -9936,6 +9942,7 @@ var EntityMetadataSchema = discriminatedUnion("type", [
 	MonsterMetadataSchema,
 	object({
 		type: literal("player"),
+		image: string().optional(),
 		playerClass: string().optional(),
 		race: string().optional(),
 		level: string().optional(),
@@ -10047,6 +10054,25 @@ function registerEntityHandlers() {
 	electron.ipcMain.handle("entities:delete", async (_event, id, campaignId) => {
 		await deleteEntity(id, campaignId);
 		return { success: true };
+	});
+	electron.ipcMain.handle("entities:pickImage", async () => {
+		const result = await electron.dialog.showOpenDialog({
+			title: "Choose Entity Image",
+			filters: [{
+				name: "Images",
+				extensions: [
+					"jpg",
+					"jpeg",
+					"png",
+					"webp",
+					"gif",
+					"bmp"
+				]
+			}],
+			properties: ["openFile"]
+		});
+		if (result.canceled || result.filePaths.length === 0) return null;
+		return result.filePaths[0];
 	});
 	electron.ipcMain.handle("entities:counts", async (_event, campaignId) => {
 		const list = await getEntities(campaignId);

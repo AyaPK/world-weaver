@@ -73,6 +73,13 @@ export function EntityDetail() {
 
       <div style={contentLayout}>
         <div style={mainCol}>
+          {(entity.metadata as Record<string, unknown>).image && (
+            <img
+              src={`campaign-media://local/${encodeURIComponent((entity.metadata as Record<string, string>).image)}`}
+              style={{ width: '100%', maxHeight: 260, objectFit: 'cover', borderRadius: 10, marginBottom: 20, border: '1px solid var(--border)' }}
+            />
+          )}
+
           <div style={{ marginBottom: 20 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
               <h1 style={{ fontSize: 26, fontWeight: 700, margin: 0 }}>{entity.name}</h1>

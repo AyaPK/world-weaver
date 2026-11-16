@@ -36,12 +36,16 @@ export function EntityForm({ campaignId, defaultType = 'npc', onSaved, onCancel,
   const [visibility, setVisibility] = useState<'private' | 'campaign' | 'players'>(initialValues?.visibility ?? 'campaign')
   const [metadata, setMetadata] = useState<Record<string, unknown>>(initialValues?.metadata ?? {})
   const [saving, setSaving] = useState(false)
+  const [imagePath, setImagePath] = useState<string | null>((initialValues?.metadata?.image as string) ?? null)
 
   const handleSave = async () => {
     if (!name.trim()) return
     setSaving(true)
+    const metaWithImage = imagePath
+      ? { ...metadata, image: imagePath }
+      : Object.fromEntries(Object.entries(metadata).filter(([k]) => k !== 'image'))
     if (entityId) {
-      await window.api.entities.update(entityId, campaignId, { name, description: description || undefined, visibility, metadata })
+      await window.api.entities.update(entityId, campaignId, { name, description: description || undefined, visibility, metadata: metaWithImage })
     } else {
       await window.api.entities.create({
         campaignId,
@@ -49,17 +53,46 @@ export function EntityForm({ campaignId, defaultType = 'npc', onSaved, onCancel,
         name,
         description: description || undefined,
         visibility,
-        metadata: { ...metadata, type },
+        metadata: { ...metaWithImage, type },
       })
     }
     setSaving(false)
     onSaved()
   }
 
+  const handlePickImage = async () => {
+    const path = await window.api.entities.pickImage()
+    if (path) setImagePath(path)
+  }
+
+  const handleRemoveImage = () => setImagePath(null)
+
   const setMeta = (key: string, value: string) => setMetadata((m) => ({ ...m, [key]: value }))
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* Image picker */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <label style={labelStyle}>Image</label>
+        {imagePath ? (
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+            <img
+              src={`campaign-media://local/${encodeURIComponent(imagePath)}`}
+              style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--border)', flexShrink: 0 }}
+            />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingTop: 4 }}>
+              <button onClick={handlePickImage} style={imageBtn}>Change</button>
+              <button onClick={handleRemoveImage} style={{ ...imageBtn, color: 'var(--text-muted)' }}>Remove</button>
+            </div>
+          </div>
+        ) : (
+          <button onClick={handlePickImage} style={imagePlaceholder}>
+            <span style={{ fontSize: 22, lineHeight: 1, color: 'var(--text-muted)' }}>+</span>
+            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Set Image</span>
+          </button>
+        )}
+      </div>
+
       <Input label="Name" value={name} onChange={setName} placeholder="Entity name" autoFocus />
 
       {!entityId && (
@@ -340,4 +373,29 @@ const labelStyle: React.CSSProperties = {
   fontSize: 13,
   color: 'var(--text-secondary)',
   fontWeight: 500,
+}
+
+const imagePlaceholder: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: 6,
+  width: 80,
+  height: 80,
+  borderRadius: 8,
+  border: '1.5px dashed var(--border-light)',
+  background: 'var(--bg-tertiary)',
+  cursor: 'pointer',
+}
+
+const imageBtn: React.CSSProperties = {
+  background: 'var(--bg-hover)',
+  border: '1px solid var(--border)',
+  borderRadius: 6,
+  color: 'var(--text-secondary)',
+  fontSize: 12,
+  fontWeight: 500,
+  padding: '5px 10px',
+  cursor: 'pointer',
 }
