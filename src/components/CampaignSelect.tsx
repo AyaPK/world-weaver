@@ -225,6 +225,10 @@ function CampaignCard({
   onEdit: (e: React.MouseEvent) => void
   onDelete: (e: React.MouseEvent) => void
 }) {
+  const bgUrl = c.backgroundImage
+    ? `campaign-media://local/${encodeURIComponent(c.backgroundImage)}`
+    : null
+
   return (
     <div
       style={{
@@ -236,6 +240,26 @@ function CampaignCard({
       onMouseLeave={onMouseLeave}
       onClick={onClick}
     >
+      {bgUrl ? (
+        <div style={{
+          height: 110,
+          backgroundImage: `url("${bgUrl}")`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          flexShrink: 0,
+        }} />
+      ) : (
+        <div style={{
+          height: 110,
+          background: 'var(--accent-dim)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+        }}>
+          <BookOpen size={28} color="var(--accent)" style={{ opacity: 0.5 }} />
+        </div>
+      )}
       <div style={cardBody}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -300,6 +324,7 @@ function LoadingSkeleton() {
     <div style={gridStyle}>
       {[0, 1, 2].map((i) => (
         <div key={i} style={{ ...cardStyle, borderColor: 'var(--border)', cursor: 'default', opacity: 0.5 }}>
+          <div style={{ height: 110, background: 'var(--bg-hover)', animation: 'pulse 1.4s ease-in-out infinite', flexShrink: 0 }} />
           <div style={{ ...cardBody, display: 'flex', flexDirection: 'column', gap: 10 }}>
             <div style={skeletonLine(140, 16)} />
             <div style={skeletonLine(72, 20)} />
