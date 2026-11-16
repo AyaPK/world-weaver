@@ -19,8 +19,8 @@ interface OrbitalNodeDef {
 
 // Uniform orbital radius in px
 const ORBIT_RADIUS = 210
-// 9 nodes, start at top (-90°), evenly spaced at 40° each
-const ANGLES = [0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => ((i * 40 - 90) * Math.PI) / 180)
+// 8 nodes, start at top (-90°), evenly spaced at 45° each
+const ANGLES = [0, 1, 2, 3, 4, 5, 6, 7].map((i) => ((i * 45 - 90) * Math.PI) / 180)
 
 // ---------------------------------------------------------------------------
 // Component
@@ -117,14 +117,6 @@ export function CampaignHub() {
       color: 'var(--spell-color)',
       action: () => navigateToEntityList('spell'),
       entityType: 'spell',
-    },
-    {
-      id: 'map',
-      label: 'Map',
-      sublabel: undefined,
-      icon: <MapPin size={20} />,
-      color: '#60a5fa',
-      action: () => navigateToEntityList(null),
     },
   ]
 

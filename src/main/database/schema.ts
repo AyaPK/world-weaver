@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core'
+import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core'
 
 export const workspaces = sqliteTable('workspaces', {
   id: text('id').primaryKey(),
@@ -141,3 +141,48 @@ export const encounterEntries = sqliteTable(
 
 export type DbEncounterEntry = typeof encounterEntries.$inferSelect
 export type NewDbEncounterEntry = typeof encounterEntries.$inferInsert
+
+export const maps = sqliteTable(
+  'maps',
+  {
+    id: text('id').primaryKey(),
+    campaignId: text('campaign_id')
+      .notNull()
+      .references(() => campaigns.id),
+    name: text('name').notNull(),
+    imagePath: text('image_path'),
+    createdAt: integer('created_at').notNull(),
+    updatedAt: integer('updated_at').notNull(),
+  },
+  (t) => [
+    index('maps_campaign_id_idx').on(t.campaignId),
+  ],
+)
+
+export type DbMap = typeof maps.$inferSelect
+export type NewDbMap = typeof maps.$inferInsert
+
+export const mapPins = sqliteTable(
+  'map_pins',
+  {
+    id: text('id').primaryKey(),
+    mapId: text('map_id')
+      .notNull()
+      .references(() => maps.id),
+    campaignId: text('campaign_id')
+      .notNull()
+      .references(() => campaigns.id),
+    entityId: text('entity_id')
+      .notNull()
+      .references(() => entities.id),
+    x: real('x').notNull(),
+    y: real('y').notNull(),
+    createdAt: integer('created_at').notNull(),
+  },
+  (t) => [
+    index('map_pins_map_id_idx').on(t.mapId),
+  ],
+)
+
+export type DbMapPin = typeof mapPins.$inferSelect
+export type NewDbMapPin = typeof mapPins.$inferInsert

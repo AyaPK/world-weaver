@@ -73,6 +73,19 @@ const api = {
       ipcRenderer.invoke('encounters:updateEntry', id, data),
     deleteEntry: (id: string) => ipcRenderer.invoke('encounters:deleteEntry', id),
   },
+  maps: {
+    list: (campaignId: string) => ipcRenderer.invoke('maps:list', campaignId),
+    create: (data: { campaignId: string; name: string; imagePath?: string }) =>
+      ipcRenderer.invoke('maps:create', data),
+    update: (id: string, campaignId: string, data: { name?: string; imagePath?: string | null }) =>
+      ipcRenderer.invoke('maps:update', id, campaignId, data),
+    delete: (id: string, campaignId: string) => ipcRenderer.invoke('maps:delete', id, campaignId),
+    getPins: (mapId: string) => ipcRenderer.invoke('maps:getPins', mapId),
+    createPin: (data: { mapId: string; campaignId: string; entityId: string; x: number; y: number }) =>
+      ipcRenderer.invoke('maps:createPin', data),
+    deletePin: (id: string) => ipcRenderer.invoke('maps:deletePin', id),
+    pickImage: () => ipcRenderer.invoke('maps:pickImage'),
+  },
 }
 
 contextBridge.exposeInMainWorld('api', api)

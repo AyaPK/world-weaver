@@ -9,6 +9,7 @@ import { CombatTracker } from './components/CombatTracker'
 import { EntityList } from './components/EntityList'
 import { EntityDetail } from './components/EntityDetail'
 import { SettingsPanel } from './components/SettingsPanel'
+import { MapViewer } from './components/MapViewer'
 
 function App() {
   const view = useAppStore((s) => s.view)
@@ -20,6 +21,7 @@ function App() {
       case 'world-bible': return <CampaignHub />
       case 'encounters': return <EncounterCreator />
       case 'combat': return <CombatTracker />
+      case 'map': return <MapViewer />
       case 'entity-list': return <EntityList />
       case 'entity-detail': return <EntityDetail />
       case 'settings': return <SettingsPanel />

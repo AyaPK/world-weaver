@@ -203,6 +203,25 @@ export interface Encounter {
   groups: EncounterGroup[]
 }
 
+export interface CampaignMap {
+  id: string
+  campaignId: string
+  name: string
+  imagePath: string | null
+  createdAt: number
+  updatedAt: number
+}
+
+export interface MapPin {
+  id: string
+  mapId: string
+  campaignId: string
+  entityId: string
+  x: number
+  y: number
+  createdAt: number
+}
+
 declare global {
   interface Window {
     api: {
@@ -266,6 +285,16 @@ declare global {
         createEntry: (data: { groupId: string; encounterId: string; name: string; cr?: string; count?: number; notes?: string; sortOrder?: number }) => Promise<EncounterEntry>
         updateEntry: (id: string, data: { name?: string; cr?: string; count?: number; notes?: string }) => Promise<EncounterEntry>
         deleteEntry: (id: string) => Promise<{ success: boolean }>
+      }
+      maps: {
+        list: (campaignId: string) => Promise<CampaignMap[]>
+        create: (data: { campaignId: string; name: string; imagePath?: string }) => Promise<CampaignMap>
+        update: (id: string, campaignId: string, data: { name?: string; imagePath?: string | null }) => Promise<CampaignMap>
+        delete: (id: string, campaignId: string) => Promise<{ success: boolean }>
+        getPins: (mapId: string) => Promise<MapPin[]>
+        createPin: (data: { mapId: string; campaignId: string; entityId: string; x: number; y: number }) => Promise<MapPin>
+        deletePin: (id: string) => Promise<{ success: boolean }>
+        pickImage: () => Promise<string | null>
       }
     }
   }

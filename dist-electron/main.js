@@ -4237,6 +4237,23 @@ var encounterEntries = sqliteTable("encounter_entries", {
 	notes: text("notes"),
 	sortOrder: integer("sort_order").notNull().default(0)
 }, (t) => [index("encounter_entries_group_id_idx").on(t.groupId), index("encounter_entries_encounter_id_idx").on(t.encounterId)]);
+var maps = sqliteTable("maps", {
+	id: text("id").primaryKey(),
+	campaignId: text("campaign_id").notNull().references(() => campaigns$1.id),
+	name: text("name").notNull(),
+	imagePath: text("image_path"),
+	createdAt: integer("created_at").notNull(),
+	updatedAt: integer("updated_at").notNull()
+}, (t) => [index("maps_campaign_id_idx").on(t.campaignId)]);
+var mapPins = sqliteTable("map_pins", {
+	id: text("id").primaryKey(),
+	mapId: text("map_id").notNull().references(() => maps.id),
+	campaignId: text("campaign_id").notNull().references(() => campaigns$1.id),
+	entityId: text("entity_id").notNull().references(() => entities$1.id),
+	x: real("x").notNull(),
+	y: real("y").notNull(),
+	createdAt: integer("created_at").notNull()
+}, (t) => [index("map_pins_map_id_idx").on(t.mapId)]);
 // src/main/workspaces/workspaceService.ts
 var activeWorkspace = null;
 async function initialiseWorkspace() {
@@ -10410,6 +10427,115 @@ function registerEncounterHandlers() {
 	electron.ipcMain.handle("encounters:updateEntry", (_event, id, data) => updateEntry(id, data));
 	electron.ipcMain.handle("encounters:deleteEntry", (_event, id) => deleteEntry(id).then(() => ({ success: true })));
 }
+// src/main/maps/mapService.ts
+function deserialiseMap(row) {
+	return {
+		id: row.id,
+		campaignId: row.campaignId,
+		name: row.name,
+		imagePath: row.imagePath ?? null,
+		createdAt: row.createdAt,
+		updatedAt: row.updatedAt
+	};
+}
+function deserialisePin(row) {
+	return {
+		id: row.id,
+		mapId: row.mapId,
+		campaignId: row.campaignId,
+		entityId: row.entityId,
+		x: row.x,
+		y: row.y,
+		createdAt: row.createdAt
+	};
+}
+async function getMaps(campaignId) {
+	return (await getDatabase().select().from(maps).where(eq(maps.campaignId, campaignId)).orderBy(maps.createdAt)).map(deserialiseMap);
+}
+async function createMap(data) {
+	const db = getDatabase();
+	const now = Date.now();
+	const row = {
+		id: (0, crypto$1.randomUUID)(),
+		campaignId: data.campaignId,
+		name: data.name,
+		imagePath: data.imagePath ?? null,
+		createdAt: now,
+		updatedAt: now
+	};
+	await db.insert(maps).values(row);
+	return deserialiseMap(row);
+}
+async function updateMap(id, campaignId, data) {
+	const db = getDatabase();
+	const patch = { updatedAt: Date.now() };
+	if (data.name !== void 0) patch.name = data.name;
+	if (data.imagePath !== void 0) patch.imagePath = data.imagePath;
+	await db.update(maps).set(patch).where(and(eq(maps.id, id), eq(maps.campaignId, campaignId)));
+	const rows = await db.select().from(maps).where(eq(maps.id, id));
+	if (!rows[0]) throw new Error(`Map not found: ${id}`);
+	return deserialiseMap(rows[0]);
+}
+async function deleteMap(id, campaignId) {
+	const db = getDatabase();
+	await db.delete(mapPins).where(eq(mapPins.mapId, id));
+	await db.delete(maps).where(and(eq(maps.id, id), eq(maps.campaignId, campaignId)));
+}
+async function getMapPins(mapId) {
+	return (await getDatabase().select().from(mapPins).where(eq(mapPins.mapId, mapId)).orderBy(mapPins.createdAt)).map(deserialisePin);
+}
+async function createMapPin(data) {
+	const db = getDatabase();
+	const row = {
+		id: (0, crypto$1.randomUUID)(),
+		mapId: data.mapId,
+		campaignId: data.campaignId,
+		entityId: data.entityId,
+		x: data.x,
+		y: data.y,
+		createdAt: Date.now()
+	};
+	await db.insert(mapPins).values(row);
+	return deserialisePin(row);
+}
+async function deleteMapPin(id) {
+	await getDatabase().delete(mapPins).where(eq(mapPins.id, id));
+}
+// electron/handlers/maps.ts
+function registerMapHandlers() {
+	electron.ipcMain.handle("maps:list", (_event, campaignId) => getMaps(campaignId));
+	electron.ipcMain.handle("maps:create", (_event, data) => createMap(data));
+	electron.ipcMain.handle("maps:update", (_event, id, campaignId, data) => updateMap(id, campaignId, data));
+	electron.ipcMain.handle("maps:delete", async (_event, id, campaignId) => {
+		await deleteMap(id, campaignId);
+		return { success: true };
+	});
+	electron.ipcMain.handle("maps:getPins", (_event, mapId) => getMapPins(mapId));
+	electron.ipcMain.handle("maps:createPin", (_event, data) => createMapPin(data));
+	electron.ipcMain.handle("maps:deletePin", async (_event, id) => {
+		await deleteMapPin(id);
+		return { success: true };
+	});
+	electron.ipcMain.handle("maps:pickImage", async () => {
+		const result = await electron.dialog.showOpenDialog({
+			title: "Choose Map Image",
+			filters: [{
+				name: "Images",
+				extensions: [
+					"jpg",
+					"jpeg",
+					"png",
+					"webp",
+					"gif",
+					"bmp"
+				]
+			}],
+			properties: ["openFile"]
+		});
+		if (result.canceled || result.filePaths.length === 0) return null;
+		return result.filePaths[0];
+	});
+}
 // electron/main.ts
 process.env.DIST = path.default.join(__dirname, "../dist");
 process.env.VITE_PUBLIC = electron.app.isPackaged ? process.env.DIST : path.default.join(process.env.DIST, "../public");
@@ -10477,6 +10603,7 @@ electron.app.whenReady().then(async () => {
 	registerRelationshipHandlers();
 	registerSettingsHandlers();
 	registerEncounterHandlers();
+	registerMapHandlers();
 	createWindow();
 });
 electron.app.on("before-quit", () => {

@@ -43,5 +43,15 @@ electron.contextBridge.exposeInMainWorld("api", {
 		createEntry: (data) => electron.ipcRenderer.invoke("encounters:createEntry", data),
 		updateEntry: (id, data) => electron.ipcRenderer.invoke("encounters:updateEntry", id, data),
 		deleteEntry: (id) => electron.ipcRenderer.invoke("encounters:deleteEntry", id)
+	},
+	maps: {
+		list: (campaignId) => electron.ipcRenderer.invoke("maps:list", campaignId),
+		create: (data) => electron.ipcRenderer.invoke("maps:create", data),
+		update: (id, campaignId, data) => electron.ipcRenderer.invoke("maps:update", id, campaignId, data),
+		delete: (id, campaignId) => electron.ipcRenderer.invoke("maps:delete", id, campaignId),
+		getPins: (mapId) => electron.ipcRenderer.invoke("maps:getPins", mapId),
+		createPin: (data) => electron.ipcRenderer.invoke("maps:createPin", data),
+		deletePin: (id) => electron.ipcRenderer.invoke("maps:deletePin", id),
+		pickImage: () => electron.ipcRenderer.invoke("maps:pickImage")
 	}
 });

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BookOpen, Home, ListOrdered, Swords } from 'lucide-react'
+import { BookOpen, Home, ListOrdered, Map, Swords } from 'lucide-react'
 import { useAppStore } from '../store/useAppStore'
 import type { AppSection } from '../store/useAppStore'
 
@@ -29,10 +29,16 @@ const SECTIONS: SectionDef[] = [
     icon: <ListOrdered size={18} />,
     color: '#fb923c',
   },
+  {
+    id: 'map',
+    label: 'Maps',
+    icon: <Map size={18} />,
+    color: '#60a5fa',
+  },
 ]
 
 export function AppSidebar() {
-  const { appSection, activeCampaign, navigateToCampaignOverview, navigateToWorldBible, navigateToEncounters, navigateToCombat } = useAppStore()
+  const { appSection, activeCampaign, navigateToCampaignOverview, navigateToWorldBible, navigateToEncounters, navigateToCombat, navigateToMap } = useAppStore()
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
 
   if (!activeCampaign) return null
@@ -41,6 +47,7 @@ export function AppSidebar() {
     'world-bible': navigateToWorldBible,
     encounters: navigateToEncounters,
     combat: navigateToCombat,
+    map: navigateToMap,
   }
 
   return (

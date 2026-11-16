@@ -43,6 +43,13 @@
       "when": 1794575385239,
       "tag": "0005_campaign_background",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1794600000000,
+      "tag": "0006_map_viewer",
+      "breakpoints": true
     }
   ]
 }

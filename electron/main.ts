@@ -8,6 +8,7 @@ import { registerEntityHandlers } from './handlers/entities'
 import { registerRelationshipHandlers } from './handlers/relationships'
 import { registerSettingsHandlers } from './handlers/settings'
 import { registerEncounterHandlers } from './handlers/encounters'
+import { registerMapHandlers } from './handlers/maps'
 
 process.env.DIST = path.join(__dirname, '../dist')
 process.env.VITE_PUBLIC = app.isPackaged
@@ -91,6 +92,7 @@ app.whenReady().then(async () => {
   registerRelationshipHandlers()
   registerSettingsHandlers()
   registerEncounterHandlers()
+  registerMapHandlers()
   createWindow()
 })
 
