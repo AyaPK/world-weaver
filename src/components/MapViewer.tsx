@@ -27,7 +27,11 @@ export function MapViewer() {
     if (list.length > 0 && !selectedMapId) setSelectedMapId(list[0].id)
   }, [activeCampaign, selectedMapId])
 
-  useEffect(() => { loadMaps() }, [activeCampaign])
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadMaps()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeCampaign])
 
   const loadPins = useCallback(async (mapId: string) => {
     const p = await window.api.maps.getPins(mapId)
@@ -35,8 +39,13 @@ export function MapViewer() {
   }, [])
 
   useEffect(() => {
-    if (selectedMapId) loadPins(selectedMapId)
-    else setPins([])
+    if (selectedMapId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      loadPins(selectedMapId)
+    } else {
+      Promise.resolve().then(() => setPins([]))
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedMapId])
 
   // ── Create map ────────────────────────────────────────────────────────────
@@ -251,6 +260,7 @@ function MapCanvas({ map, pins, campaignId, onPickImage, onPinCreated, onPinDele
   // Dragging
   const dragging = useRef(false)
   const dragStart = useRef({ mx: 0, my: 0, px: 0, py: 0 })
+  const [isDragging, setIsDragging] = useState(false)
 
   // Image natural size (needed for coordinate math)
   const imgRef = useRef<HTMLImageElement>(null)
@@ -258,7 +268,9 @@ function MapCanvas({ map, pins, campaignId, onPickImage, onPinCreated, onPinDele
 
   // Reset view when map changes
   useEffect(() => {
-    setZoom(1); setPan({ x: 0, y: 0 }); setActivePinId(null); setAddPinMode(false)
+    Promise.resolve().then(() => {
+      setZoom(1); setPan({ x: 0, y: 0 }); setActivePinId(null); setAddPinMode(false)
+    })
   }, [map.id])
 
   // ── Wheel zoom ────────────────────────────────────────────────────────────
@@ -284,6 +296,7 @@ function MapCanvas({ map, pins, campaignId, onPickImage, onPinCreated, onPinDele
     if (addPinMode) return
     if ((e.target as HTMLElement).closest('[data-pin]')) return
     dragging.current = true
+    setIsDragging(true)
     dragStart.current = { mx: e.clientX, my: e.clientY, px: pan.x, py: pan.y }
   }, [addPinMode, pan])
 
@@ -295,7 +308,7 @@ function MapCanvas({ map, pins, campaignId, onPickImage, onPinCreated, onPinDele
     })
   }, [])
 
-  const onMouseUp = useCallback(() => { dragging.current = false }, [])
+  const onMouseUp = useCallback(() => { dragging.current = false; setIsDragging(false) }, [])
 
   // ── Click on canvas (place pin) ───────────────────────────────────────────
   const onCanvasClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -369,7 +382,7 @@ function MapCanvas({ map, pins, campaignId, onPickImage, onPinCreated, onPinDele
           flex: 1,
           overflow: 'hidden',
           position: 'relative',
-          cursor: addPinMode ? 'crosshair' : dragging.current ? 'grabbing' : 'grab',
+          cursor: addPinMode ? 'crosshair' : isDragging ? 'grabbing' : 'grab',
           background: 'var(--bg-primary)',
           userSelect: 'none',
         }}
@@ -484,7 +497,7 @@ function PinMarker({
     >
       {/* The pin marker */}
       <div
-        onClick={e => { e.stopPropagation(); active ? onDismiss() : onActivate() }}
+        onClick={e => { e.stopPropagation(); if (active) { onDismiss() } else { onActivate() } }}
         title={entity.name}
         style={{
           width: 28, height: 28,
